@@ -31,13 +31,24 @@
         },
 
         reportSpecResults: function(spec) {
-            var resultText = "Failed.";
-            
-            if (spec.results().passed()) {
-                resultText = "Passed.";
+            var results = spec.results();
+            var status = results.passed() ? 'passed' : 'failed';
+            if (results.skipped) {
+                status = 'skipped';
             }
-            
-            this.log(resultText);
+            var resultItems = results.getItems();
+            for ( var i = 0; i < resultItems.length; i++ ) {
+                var result = resultItems[i];
+                if (result.type == 'log' ) {
+                    this.log(result.toString());
+                } else if ( result.type == 'expect' && result.passed && !result.passed()) {
+                    this.log( result.message);
+                    if ( result.trace.stack ) {
+                        this.log( result.trace.stack );
+                    }
+                } 
+            }
+            this.log(status + "\n");
         },
 
         reportSpecStarting: function(spec) {
